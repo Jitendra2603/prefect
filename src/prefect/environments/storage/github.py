@@ -83,7 +83,7 @@ class GitHub(Storage):
         ref = ref if ref else (self.ref if self.ref else "master")
 
         try:
-            contents = repo.files.get(file_path=flow_location, ref=ref)
+            contents = repo.get_contents(file_path=flow_location, ref=ref)
             decoded_contents = contents.decoded_content
         except UnknownObjectException as exc:
             self.logger.error(
