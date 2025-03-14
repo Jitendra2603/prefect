@@ -1,0 +1,5 @@
+enhancement:
+  - "Add ref support to Github class and methods - [#3638](https://github.com/PrefectHQ/prefect/pull/3638)"
+
+contributor:
+  - "[Jitendra](https://github.com/Jitendra2603)"

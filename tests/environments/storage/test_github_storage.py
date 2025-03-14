@@ -15,6 +15,15 @@ def test_create_github_storage():
 
 
 def test_create_github_storage_init_args():
+    storage = GitHub(repo="test/repo", path="flow.py", ref="my-branch", secrets=["auth"])
+    assert storage
+    assert storage.flows == dict()
+    assert storage.repo == "test/repo"
+    assert storage.path == "flow.py"
+    assert storage.ref == "my-branch"
+    assert storage.secrets == ["auth"]
+
+def test_create_github_storage_init_args_no_ref():
     storage = GitHub(repo="test/repo", path="flow.py", secrets=["auth"])
     assert storage
     assert storage.flows == dict()
@@ -22,8 +31,17 @@ def test_create_github_storage_init_args():
     assert storage.path == "flow.py"
     assert storage.secrets == ["auth"]
 
-
 def test_serialize_github_storage():
+    storage = GitHub(repo="test/repo", path="flow.py", ref="my-branch", secrets=["auth"])
+    serialized_storage = storage.serialize()
+
+    assert serialized_storage["type"] == "GitHub"
+    assert serialized_storage["repo"] == "test/repo"
+    assert serialized_storage["path"] == "flow.py"
+    assert serialized_storage["ref"] == "my-branch"
+    assert serialized_storage["secrets"] == ["auth"]
+
+def test_serialize_github_storage_no_ref():
     storage = GitHub(repo="test/repo", path="flow.py", secrets=["auth"])
     serialized_storage = storage.serialize()
 
@@ -37,7 +55,7 @@ def test_github_client_property(monkeypatch):
     github = MagicMock()
     monkeypatch.setattr("prefect.utilities.git.Github", github)
 
-    storage = GitHub(repo="test/repo")
+    storage = GitHub(repo="test/repo", ref="my-branch")
 
     credentials = "ACCESS_TOKEN"
     with context(secrets=dict(GITHUB_ACCESS_TOKEN=credentials)):
@@ -47,7 +65,7 @@ def test_github_client_property(monkeypatch):
 
 
 def test_add_flow_to_github_storage():
-    storage = GitHub(repo="test/repo", path="flow.py")
+    storage = GitHub(repo="test/repo", path="flow.py", ref="my-branch")
 
     f = Flow("test")
     assert f.name not in storage
@@ -87,5 +105,5 @@ def test_get_flow_github(monkeypatch):
     assert f.name not in storage
     flow_location = storage.add_flow(f)
 
-    new_flow = storage.get_flow(flow_location)
+    new_flow = storage.get_flow(flow_location, ref="my-branch")
     assert new_flow.run()
